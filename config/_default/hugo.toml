@@ -27,7 +27,7 @@ enableEmoji = true
 [taxonomies]
   tag = "tags"
   category = "categories"
-  author = "authors"
+# author = "authors" # very useful for multiple authors
   series = "series"
 
 [sitemap]
