@@ -9,7 +9,7 @@ title = "InnerReality"
   isoCode = "en"
   rtl = false
   dateFormat = "2 January 2006"
-  logo = "img/blowfish_logo.png"
+  # logo = "img/blowfish_logo.png"
   # secondaryLogo = "img/secondary-logo.png"
   # description = "My awesome website"
   # copyright = "Copy, _right?_ :thinking_face:"
@@ -17,7 +17,7 @@ title = "InnerReality"
 [params.author]
   name = "Pranav Bommarasipeta"
   email = "youremail@example.com"
-  image = "img/blowfish_logo.png"
+  image = "img/pranav.jpg"
   imageQuality = 96
   headline = "A storm, a spark and a clear lake"
   bio = "PhD Student, Civil Engineering, University at Buffalo"
