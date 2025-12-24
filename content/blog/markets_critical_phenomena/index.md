@@ -2,7 +2,7 @@
 ---
 title: "Reflection on Markets as a Critical Phenomena"
 weight: 1
-draft: false
+draft: true
 description: "Reflection on Markets as a Critical Phenomena"
 slug: "markets-as-critical-phenomena"
 tags: ["blog", "markets","physics","reflection"]
