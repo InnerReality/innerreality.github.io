@@ -33,7 +33,7 @@
 [[subnavigation]]
   name = "My Github"
   pre = "github"
-  url = "https://github.com/InnerReailty/"
+  url = "https://github.com/InnerReality/"
   weight = 20
  
 #[[main]]
@@ -60,6 +60,10 @@
   pageRef = "categories"
   weight = 20
 [[footer]]
-  name = "Authors"
-  pageRef = "authors"
+  name = "About"
+  pageRef = "about"
   weight = 20
+#[[footer]] # very useful for multiple authors
+#  name = "Authors"
+#  pageRef = "authors"
+#  weight = 20
