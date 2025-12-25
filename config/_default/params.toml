@@ -65,7 +65,7 @@ forgejoDefaultServer = "https://v11.next.forgejo.org"
 [article]
   showDate = true
   showViews = true
-  showLikes = false
+  showLikes = true
   showDateOnlyInArticle = false
   showDateUpdated = true
   showAuthor = true
@@ -136,13 +136,13 @@ forgejoDefaultServer = "https://v11.next.forgejo.org"
   cardViewScreenWidth = false
 
 [firebase]
-  # apiKey = "XXXXXX"
-  # authDomain = "XXXXXX"
-  # projectId = "XXXXXX"
-  # storageBucket = "XXXXXX"
-  # messagingSenderId = "XXXXXX"
-  # appId = "XXXXXX"
-  # measurementId = "XXXXXX"
+  apiKey = "AIzaSyB6_rE8ZQoZH6nnKUTAHsqPyHbKQ3px0HQ"
+  authDomain = "inner-reality-github.firebaseapp.com"
+  projectId = "inner-reality-github"
+  storageBucket = "inner-reality-github.firebasestorage.app"
+  messagingSenderId = "995739508650"
+  appId = "1:995739508650:web:f8b8945a0f043d68c795d3"
+  measurementId = "G-9BL3DE664L"
 
 [fathomAnalytics]
   # site = "ABC12345"
