@@ -102,6 +102,10 @@ The installation process usually starts and enables the `sshd` (SSH Daemon) serv
     ```bash
     sudo systemctl enable sshd
     ```
+    To combine both 1 and 2, use
+    ```bash
+    sudo systemctl enable --now sshd
+    ```
 
 
 ### 3. Find Your Server's IP Address
