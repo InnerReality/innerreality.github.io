@@ -1,20 +1,18 @@
 ---
 title: "Setting up Wireguard"
-weight: 1
+weight: 2
 draft: false
 description: "Setting up Wireguard in homeserver"
 slug: "setting-up-wireguard"
 tags: ["Homelab", "SSH", "Wireguard"]
 series: ["Homelab Setup"]
-series_order: 1
+series_order: 2
 showDate: true
 showTableOfContents: true
 date: 2026-07-12
 ---
 
-## Setting Up WireGuard + UFW + SSH on EndeavourOS Server
-
-### Introduction
+## Introduction
 
 By the time of writing, I have switched my server to **EndeavourOS**, an Arch-based Linux distribution. Therefore, some commands differ from Debian/Ubuntu-based systems.
 
