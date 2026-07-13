@@ -343,6 +343,10 @@ SSH will ask to accept the new host key.
 
 ## References
 
+Disclaimer: Minor markdown edits and filling some gaps utilized ChatGPT [^chatgpt] which was then crosschecked by me.
+
+[^chatgpt]: [ChatGPT](chatgpt.com)
+
 [^wireguard-setup]: "Simplest Wireguard setup". Available at: [https://weizenspr.eu/protect-ssh-with-wireguard/](https://weizenspr.eu/protect-ssh-with-wireguard/)
 
 [^duckdns]: "DuckDNS install" [for linux](https://www.duckdns.org/install.jsp)
