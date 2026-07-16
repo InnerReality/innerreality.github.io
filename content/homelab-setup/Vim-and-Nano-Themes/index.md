@@ -3,7 +3,7 @@ title: "[Optional] Vim and Nano Themes"
 weight: 4
 draft: false
 description: "Setting up editor themes for vim and nano themes"
-slug: "setting-up-wireguard"
+slug: "setting-up-vim-nano-themes"
 tags: ["Homelab", "Themes"]
 series: ["Homelab Setup"]
 series_order: 4
