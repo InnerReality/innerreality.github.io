@@ -16,14 +16,14 @@ date: 2026-07-12
 
 By the time of writing, I have switched my server to **EndeavourOS**, an Arch-based Linux distribution. Therefore, some commands differ from Debian/Ubuntu-based systems.
 
-It is recommended to perform the initial WireGuard and firewall setup **directly on the server**. Configuring these remotely over SSH can lock you out if firewall rules are applied before the tunnel is working.
+> [!WARNING]
+> It is recommended to perform the initial WireGuard and firewall setup **directly on the server**. Configuring these remotely over SSH can lock you out if firewall rules are applied over SSH before the tunnel is working.
 
 The goal of this setup is:
 
 - Create a WireGuard VPN tunnel between a client and server.
 - Restrict SSH access through the VPN tunnel.
-- Allow optional LAN access.
-- Use DuckDNS for dynamic public IP resolution.
+- (Optional) Use DuckDNS for dynamic public IP resolution.
 - Configure UFW firewall rules.
 
 ## Setup WireGuard
@@ -62,7 +62,7 @@ $ wg pubkey <./wg1.priv >./wg1.pub
 
 Additionally, pre-shared keys can also be generated. Refer [^wireguard-setup]
 
-## Server Configuration
+### Server Configuration
 
 Create the WireGuard configuration:
 
@@ -83,13 +83,18 @@ PostUp = iptables -t nat -I POSTROUTING -o wlp2s0 -j MASQUERADE
 PreDown = ufw route delete allow in on wg0 out on wlp2s0
 PreDown = iptables -t nat -D POSTROUTING -o wlp2s0 -j MASQUERADE
 
-ListenPort = 51830
+ListenPort = 51830 # make note of this listening port
 PrivateKey = !!!put the contents of ./wg0.priv here!!!
 
 
 [Peer]
 PublicKey = !!!put the contents of ./wg1.pub here!!!
 AllowedIPs = 10.0.0.1/32
+
+# you can add multiple clients as follows:
+[Peer]
+PublicKey = !!!put the contents of ./wg2.pub here!!!
+AllowedIPs = 10.0.0.2/32
 ```
 
 `wlp2s0` is the wifi network interface which can be replaced by your preferred network interface like `eth0`.
@@ -109,15 +114,11 @@ eth0   ## Ethernet
 
 `PostUp` and `PreDown` masquerading rules are taken from [^masquerade]. You can add your own rules to configure different functionality like killswitch [^killswitch].
 
-## Client Configuration
+### Client Configuration
 
-Create the client WireGuard configuration:
+Create the WireGuard configuration in client device.
 
-```bash
-wg0.conf
-```
-
-Example:
+Example `wg1.conf`:
 
 ```ini
 [Interface]
@@ -130,7 +131,9 @@ DNS = 1.1.1.1
 [Peer]
 PublicKey = !!!put the contents of ./wg0.pub here!!!
 AllowedIPs = 10.0.0.10/32
-Endpoint = server.duckdns.org:51830 #or the server ip address
+Endpoint = server.duckdns.org:51830 # or the server ip address, with listen port
+
+# no need to add other clients here, since this is not point to point configuration
 ```
 
 ### Understanding AllowedIPs
@@ -187,7 +190,9 @@ Enable and start:
 sudo systemctl enable --now ufw
 ```
 
-### Allow WireGuard Port
+### UFW Rules
+
+#### Allow WireGuard Port
 
 WireGuard listens on UDP port `51830`:
 
@@ -197,7 +202,7 @@ sudo ufw allow 51830/udp
 
 This port must be accessible from the internet if connecting remotely.
 
-### Allow Local Network Access
+#### Allow Local Network Access
 
 To allow devices on the local network to access the server directly:
 
@@ -213,7 +218,7 @@ Replace:
 
 with the server's LAN IP.
 
-### Allow SSH Through WireGuard
+#### Allow SSH Through WireGuard
 
 Allow SSH access only from the WireGuard subnet:
 
@@ -223,15 +228,11 @@ sudo ufw allow from 10.0.0.0/24 to 10.0.0.10 port 22 proto tcp
 
 This allows:
 
-```bash
-Client
-  |
-  | WireGuard tunnel
-  |
-10.0.0.10 Server
-  |
-SSH port 22
-```
+{{< mermaid >}}
+flowchart LR
+    A[Client] -->|WireGuard tunnel| B["Server\n10.0.0.10"]
+    B --> C["SSH\nPort 22"]
+{{< /mermaid >}}
 
 ### Run the firewall
 
@@ -260,6 +261,8 @@ or:
 ```bash
 sudo systemctl start wg-quick@wg0.service
 ```
+
+### Check if wireguard is running
 
 Check the interface:
 
@@ -293,7 +296,9 @@ or specify the port:
 ssh -p 22 user@10.0.0.10
 ```
 
-## Removing Old SSH Host Signature
+## Troubleshooting
+
+### Removing Old SSH Host Signature
 
 After reinstalling the operating system, SSH may show:
 
@@ -305,7 +310,7 @@ After reinstalling the operating system, SSH may show:
 
 This happens because reinstalling the OS generates a new SSH host key.
 
-### Verify the New Server Key
+#### Verify the New Server Key
 
 Run this directly on the server (not through SSH):
 
@@ -315,7 +320,7 @@ sudo ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub
 
 Confirm that the displayed fingerprint matches the server's expected key.
 
-### Remove the Old Client Entry
+#### Remove the Old Client Entry
 
 On the client:
 
@@ -330,6 +335,58 @@ ssh user@10.0.0.10
 ```
 
 SSH will ask to accept the new host key.
+
+### SSH Connection Refused
+
+If SSH connection refused as follows on your client device
+
+```bash
+ssh: connect to host 10.0.0.10 port 22: Connection refused
+```
+
+#### 1. Check if SSH is running on host
+
+   ```bash
+    sudo systemctl status sshd
+  ```
+
+   Look for `Active: active (running)` in the output. If it's running, you can connect. Otherwise, use the following command to start the service.
+
+  ```bash
+    sudo systemctl start sshd
+  ```
+
+  Additionally if it doesn't display `enabled` here:
+  
+  ```bash
+   Loaded: loaded (/usr/lib/systemd/system/sshd.service; enabled; preset: disabled)
+  ```
+
+  Then it is recommended to automatically restart on boot by
+
+  ```bash
+    sudo systemctl enable sshd
+  ```
+
+#### 2. Wireguard Status
+
+Check if [wireguard is running](#check-if-wireguard-is-running)
+
+#### 3. UFW configuration
+
+1. Check UFW configuration (only shows up if it is enabled) and verify the [rules added](#ufw-rules)
+
+    ```bash
+    sudo ufw status numbered
+    ```
+
+2. Try connecting via client within the local network (with `192.168.1.xxx`)
+
+3. Disable firewall and check if SSH connection works with or without wireguard.
+
+    ```bash
+    sudo ufw disable
+    ```
 
 ## References
 

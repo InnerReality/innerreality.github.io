@@ -76,7 +76,7 @@ You must be logged in as a user with **sudo** privileges to perform this action.
 
 ## Installing OpenSSH
 
-Debian server doesn't have `sudo` installed yet so we proceed with `su`. The `sudo` is covered in the [follwing section](#sudo). As a root user, run the following commands.
+Debian server doesn't have `sudo` installed yet so we proceed with `su`. The `sudo` is covered in the [follwing section](#set-up-sudo-for-your-user). As a root user, run the following commands.
 
 ### 1. Install the SSH Server Package
 
@@ -143,11 +143,9 @@ You need the server's IP address to connect from a remote machine.
 From your local machine (Windows, macOS, or Linux), use the `ssh` client command to connect. Installation instructions for `openssh-server` on the client is based on the OS that you use.
 
 ```bash
-ssh username@server_ip_address
+ssh [user]@[IP_address]
 # Example: ssh jsmith@192.168.1.100
 ```
-
-<a id="sudo"></a>
 
 ## Set Up `sudo` for Your User
 
@@ -225,6 +223,9 @@ To secure your server, you should switch from password authentication to public 
         ```config
         PasswordAuthentication no
         ```
+
+    > [!WARNING]
+    > Only disable Password Authentication when you are sure that public-private key authentication is working
 
 3. Save and exit the file.
 
