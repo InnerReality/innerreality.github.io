@@ -4,7 +4,7 @@ weight: 2
 draft: false
 description: "Setting up Wireguard in homeserver"
 slug: "setting-up-wireguard"
-tags: ["Homelab", "SSH", "Wireguard"]
+tags: ["Homelab", "SSH", "Wireguard", "EndeavourOS"]
 series: ["Homelab Setup"]
 series_order: 2
 showDate: true
@@ -102,7 +102,7 @@ ip addr
 
 Example interfaces:
 
-```
+```bash
 wlp2s0   ## WiFi
 eth0   ## Ethernet
 ```
@@ -133,7 +133,6 @@ AllowedIPs = 10.0.0.10/32
 Endpoint = server.duckdns.org:51830 #or the server ip address
 ```
 
-
 ### Understanding AllowedIPs
 
 For SSH-only access:
@@ -152,8 +151,6 @@ AllowedIPs = 0.0.0.0/0
 
 would route all IPv4 traffic through the server.
 
-
-
 ## Setup DuckDNS Endpoint (Optional)
 
 If the server is accessed outside the local network, the public IP address may change periodically.
@@ -162,13 +159,11 @@ DuckDNS provides a free dynamic DNS service that maps a domain name to your curr
 
 Example:
 
-```
+```bash
 server.duckdns.org
 ```
 
 DuckDNS supports up to five free domains. Note that the required UDP and SSH ports need to be forwarded via router.
-
-
 
 ## Enable WireGuard at Startup
 
@@ -177,8 +172,6 @@ Enable WireGuard to start automatically:
 ```bash
 sudo systemctl enable wg-quick@wg0.service
 ```
-
-
 
 ## Setting Up UFW Firewall
 
@@ -194,8 +187,6 @@ Enable and start:
 sudo systemctl enable --now ufw
 ```
 
-
-
 ### Allow WireGuard Port
 
 WireGuard listens on UDP port `51830`:
@@ -205,8 +196,6 @@ sudo ufw allow 51830/udp
 ```
 
 This port must be accessible from the internet if connecting remotely.
-
-
 
 ### Allow Local Network Access
 
@@ -218,13 +207,11 @@ sudo ufw allow from 192.168.1.0/24 to 192.168.1.xxx
 
 Replace:
 
-```
+```bash
 192.168.1.xxx
 ```
 
 with the server's LAN IP.
-
-
 
 ### Allow SSH Through WireGuard
 
@@ -236,7 +223,7 @@ sudo ufw allow from 10.0.0.0/24 to 10.0.0.10 port 22 proto tcp
 
 This allows:
 
-```
+```bash
 Client
   |
   | WireGuard tunnel
@@ -245,8 +232,6 @@ Client
   |
 SSH port 22
 ```
-
-
 
 ## Start WireGuard
 
@@ -270,7 +255,7 @@ ip addr
 
 You should see:
 
-```
+```bash
 wg0
 ```
 
@@ -279,8 +264,6 @@ Check WireGuard status:
 ```bash
 sudo wg show
 ```
-
-
 
 ## Connect Through SSH
 
@@ -296,21 +279,17 @@ or specify the port:
 ssh -p 22 user@10.0.0.10
 ```
 
-
-
 ## Removing Old SSH Host Signature
 
 After reinstalling the operating system, SSH may show:
 
-```
+```bash
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @    WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!     @
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 ```
 
 This happens because reinstalling the OS generates a new SSH host key.
-
-
 
 ### Verify the New Server Key
 
@@ -321,8 +300,6 @@ sudo ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub
 ```
 
 Confirm that the displayed fingerprint matches the server's expected key.
-
-
 
 ### Remove the Old Client Entry
 
@@ -339,7 +316,6 @@ ssh user@10.0.0.10
 ```
 
 SSH will ask to accept the new host key.
-
 
 ## References
 
@@ -359,13 +335,11 @@ Disclaimer: Minor markdown edits and filling some gaps utilized ChatGPT [^chatgp
 
 From Ubuntu
 
-https://ubuntu.com/server/docs/how-to/wireguard-vpn/common-tasks/
+[Ubuntu Server – WireGuard VPN Common Tasks](https://ubuntu.com/server/docs/how-to/wireguard-vpn/common-tasks/)
 
 The resources below explain the fundamentals of tunneling and advanced configurations
 
-https://frank.sauerburger.io/2023/09/13/ssh-over-wireguard.html
-https://www.procustodibus.com/blog/2024/02/wireguard-keys-for-ssh/
-https://www.procustodibus.com/blog/2021/05/wireguard-ufw/#point-to-point
-https://www.procustodibus.com/blog/2020/11/wireguard-point-to-point-config/
-
-
+- [SSH over WireGuard](https://frank.sauerburger.io/2023/09/13/ssh-over-wireguard.html)
+- [WireGuard Keys for SSH](https://www.procustodibus.com/blog/2024/02/wireguard-keys-for-ssh/)
+- [WireGuard UFW – Point-to-Point](https://www.procustodibus.com/blog/2021/05/wireguard-ufw/#point-to-point)
+- [WireGuard Point-to-Point Config](https://www.procustodibus.com/blog/2020/11/wireguard-point-to-point-config/)
