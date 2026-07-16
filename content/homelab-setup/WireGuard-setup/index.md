@@ -329,7 +329,7 @@ Confirm that the displayed fingerprint matches the server's expected key.
 On the client:
 
 ```bash
-ssh-keygen -R 10.0.0.10
+ssh-keygen -R [10.0.0.10]:22 # Port number matters if you're using non-standard port
 ```
 
 Then reconnect:
