@@ -224,8 +224,9 @@ To secure your server, you should switch from password authentication to public 
         PasswordAuthentication no
         ```
 
-    > [!WARNING]
-    > Only disable Password Authentication when you are sure that public-private key authentication is working
+    {{< alert >}}
+    **Warning!** Only disable Password Authentication when you are sure that public-private key authentication is working
+    {{< /alert >}}
 
 3. Save and exit the file.
 

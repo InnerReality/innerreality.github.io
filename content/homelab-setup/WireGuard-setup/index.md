@@ -1,10 +1,10 @@
 ---
-title: "Setting up Wireguard"
+title: "Setting up Wireguard (with DuckDNS)"
 weight: 2
 draft: false
-description: "Setting up Wireguard in homeserver"
+description: "Setting up Wireguard with optional DuckDNS in homeserver"
 slug: "setting-up-wireguard"
-tags: ["Homelab", "SSH", "Wireguard", "EndeavourOS"]
+tags: ["Homelab", "SSH", "Wireguard", "EndeavourOS", "DuckDNS"]
 series: ["Homelab Setup"]
 series_order: 2
 showDate: true
@@ -16,8 +16,9 @@ date: 2026-07-12
 
 By the time of writing, I have switched my server to **EndeavourOS**, an Arch-based Linux distribution. Therefore, some commands differ from Debian/Ubuntu-based systems.
 
-> [!WARNING]
-> It is recommended to perform the initial WireGuard and firewall setup **directly on the server**. Configuring these remotely over SSH can lock you out if firewall rules are applied over SSH before the tunnel is working.
+{{< alert >}}
+**Warning!** It is recommended to perform the initial WireGuard and firewall setup **directly on the server**. Configuring these remotely over SSH can lock you out if firewall rules are applied over SSH before the tunnel is working.
+{{< /alert >}}
 
 The goal of this setup is:
 
@@ -158,15 +159,110 @@ would route all IPv4 traffic through the server.
 
 If the server is accessed outside the local network, the public IP address may change periodically.
 
-DuckDNS provides a free dynamic DNS service that maps a domain name to your current public IP. Setup instructions can be found on their website.[^duckdns]
+DuckDNS provides a free dynamic DNS service that maps a domain name to your current public IP. Setup instructions can be found on their website.[^duckdns]. After signing up and obtaining **domain name** and **token**, setup the `cron` job for the domain `server.duckdns.org`
 
-Example:
+### Installing `cron`
+
+Since EndeavourOS doesn't come with `cron`, install it by
 
 ```bash
-server.duckdns.org
+sudo pacman -S cronie
 ```
 
-DuckDNS supports up to five free domains. Note that the required UDP and SSH ports need to be forwarded via router.
+Enable (on startup) and start by
+
+```bash
+sudo systemctl enable --now cronie
+```
+
+#### Checking `cron` status
+
+Verify that it is `Active(running)`
+
+```bash
+sudo systemctl status cronie
+```
+
+### Creating `duckdns.sh`
+
+This is a script that automatically allows `duckdns.org` to update public IP address of the server (here, the router)
+
+```bash
+mkdir duckdns
+cd duckdns
+vim duckdns.sh
+```
+
+Inside `duckdns.sh`, paste the script, change the server **domain name** under `domains` (mutiple domains are supported) and update the **token** under `token`
+
+```bash
+echo url="https://www.duckdns.org/update?domains=server&token=<your-server-token-from-duckdns>&ip=" | \
+curl -k  -o ~/duckdns/duckdns.log -K -
+
+echo "[$(/bin/date '+%Y-%m-%d %H:%M:%S')] Updated DuckDNS" >> ~/duckdns/duckdns.log
+```
+
+The last line is a custom modification that appends the date and time of the update. Used to check if `cron` job updates it correctly.
+
+### Testing `duckdns.sh`
+
+Make it executable by
+
+```bash
+chmod 700 duckdns.sh
+```
+
+Test the script by
+
+```bash
+./duckdns.sh
+```
+
+The output should be
+
+```bash
+  % Total    % Received % Xferd  Average Speed  Time    Time    Time   Current
+                                 Dload  Upload  Total   Spent   Left   Speed
+100      2   0      2   0      0      2      0                              0
+```
+
+#### Checking `duckdns.log`
+
+Check the `duckdns.log` file. It now contains the last updataed timestamp. `OK` indicates working, whereas `KO` indicates not working.
+
+```bash
+cat duckdns.log
+```
+
+```bash
+OK[2026-07-12 16:18:48] Updated DuckDNS
+```
+
+### Setting up `cron`
+
+Run
+
+```bash
+crontab -e
+```
+
+This will open up the file in vim editor (probably an EndeavourOS thing). Paste the following at the bottom and save it.
+
+```ini
+*/5 * * * * ~/duckdns/duckdns.sh >/dev/null 2>&1
+```
+
+Upon saving, the output shows
+
+```bash
+crontab: installing new crontab
+```
+
+The `cron` job will run the `duckdns.sh` every 5 minutes. You can verify by [checking `duckdns.log`](#checking-duckdnslog) after 5 minutes. Alternatively, you could also check for timestamp near `CMDEND (~/duckdns/duckdns.sh >/dev/null 2>&1)` in the logs when [checking `cron` status](#checking-cron-status)
+
+### Notes
+
+DuckDNS supports up to five domains for free. Note that the required UDP and SSH ports need to be forwarded via router.
 
 ## Enable WireGuard at Startup
 
@@ -390,7 +486,7 @@ Check if [wireguard is running](#check-if-wireguard-is-running)
 
 ## References
 
-Disclaimer: Minor markdown edits and filling some gaps utilized ChatGPT [^chatgpt] which was then crosschecked by me.
+Disclaimer: Minor markdown edits and filling some gaps utilized ChatGPT [^chatgpt] which was then crosschecked by me. Subsequent edits were typed entirely by me.
 
 [^chatgpt]: [ChatGPT](chatgpt.com)
 
