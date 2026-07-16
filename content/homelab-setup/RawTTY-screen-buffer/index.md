@@ -13,7 +13,7 @@ date: 2026-07-15
 ---
 
 
-## 1. The Issue: TTY and the Screen Buffer
+## The Issue: TTY and the Screen Buffer
 
 When I switched from Debian 13 to no desktop environment on EndeavourOS (Titan Neo) - don't ask why I switched to a rolling distribution, I just wanted to try it on a friend's suggestion - I noticed a peculiar problem.
 
@@ -23,7 +23,23 @@ When I switched from Debian 13 to no desktop environment on EndeavourOS (Titan N
 
 This was not an issue on Debian 13. I learned about terminal emulators (Kitty/Alacritty)but all these need a desktop environment. Whereas my no-desktop environment used RawTTY. I don't know how Debian 13 did but I needed a fix. After a chat session with the help of Claude [^claude], I thought what if I ran my session with `tmux`, which natively supports screen buffer?
 
-## 2. Fix 1: Custom `nano` and `vim` Commands (Wrapping Them in tmux)
+## Fix 0: Best fix
+
+EndeavourOS already has a lot of colors installed, even in no desktop mode. Just pick one of the colors using
+
+```bash
+toe
+```
+
+I chose `xfce` for example. You can change the color scheme or update in `~/.bash_profile`
+
+```bash
+export TERM=xfce
+```
+
+`xfce` supports screen buffer nicely and there was no need of installing `tmux`. If not for Claude leading me on a tangent, saying there was no solution, I wouldn't have needed `tmux`. The rest of the article is just me having fun trying to implement a solution via `tmux`.
+
+## Fix 1: Custom `nano` and `vim` Commands (Wrapping Them in tmux)
 
 Since `tmux` implements its own alternate-screen handling in software (independent of the console driver), one fix is to make `vim`/`nano` automatically launch inside a temporary `tmux` session.
 
@@ -80,12 +96,12 @@ source ~/.bashrc
 - When you quit the editor, tmux's single window closes, and since it was the only window, the whole tmux session ends automatically — dropping you back at your normal prompt.
 - If you're **already inside tmux**, it just runs the editor normally in the current pane (no nested session).
 
-## 3. Problems with Fix 1
+## Problems with Fix 1
 
 - **The screen clears instead of buffer swap** `tmux` can restore screens within its sessions correctly. But when tmux session exits, you get a clear screen and nothing on the RawTTY session is restored. I could have just added `clear` into the `command vim` / `command nano` instead of installing `tmux`
 - **Doesn't scale** — if you want this behavior for every full-screen program, wrapping individual commands isn't ideal.
 
-## 4. Method 2: Replace TTY Login with tmux
+## Fix 2: Replace TTY Login with tmux
 
 What if the tmux session started automatically the moment you log in? Then every program you run — not just vim/nano — benefits from tmux's internal screen handling, and the `exit` command logs you out.
 
@@ -97,7 +113,7 @@ nano ~/.bashrc
 
 Since I also use SSH, there are two common flavors depending on how you want SSH logins to behave.
 
-### 4.1 Flavor 1: Fresh tmux Session for Every SSH Login
+### Flavor 1: Fresh tmux Session for Every SSH Login
 
 Use this if you want your **host device** login to always reattach to the same persistent session (`main`), while every **SSH** login gets its own brand-new, isolated tmux session that no other SSH login shares.
 
@@ -126,7 +142,7 @@ fi
 
 **Note:** Since each SSH session's name (`ssh_$$`) is tied to that specific login's process ID, you can't reattach to it later (unless you get hold of the session name when it is active) — a new SSH login always gets a brand-new one. This is intentional for "fresh every time" behavior.
 
-### 4.2 Flavor 2: No tmux for SSH Login
+### Flavor 2: No tmux for SSH Login
 
 Use this if you only want `tmux` on the **host device**, and want SSH logins to behave like an ordinary plain shell (no tmux at all).
 
