@@ -233,6 +233,20 @@ Client
 SSH port 22
 ```
 
+### Run the firewall
+
+Run the firewall via  
+
+```bash
+sudo ufw enable 
+```
+
+or to reload new rules,
+
+```bash
+sudo ufw reload 
+```
+
 ## Start WireGuard
 
 Start manually:
