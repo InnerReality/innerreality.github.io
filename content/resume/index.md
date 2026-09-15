@@ -24,4 +24,4 @@ layoutBackgroundHeaderSpace: false
 ---
 
 ### PDF version
-{{< pdf-viewer src="/resume/resume-research.pdf" title="My Resume" >}}
+{{< pdf-viewer src="/resume/resume-core-phd.pdf" title="My Resume" >}}
